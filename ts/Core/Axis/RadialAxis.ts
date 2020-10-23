@@ -1203,6 +1203,15 @@ class RadialAxis {
             }
         });
 
+        // Change the fixed elements list, #14379.
+        addEvent(Highcharts.Chart, 'afterGetFixedElements', function (): void {
+            if (this.fixedSelectors) {
+                const index1 = this.fixedSelectors.indexOf('.highcharts-yaxis');
+                // Remove axis and its labels from that list.
+                this.fixedSelectors.splice(index1, 2);
+            }
+        });
+
         // Wrap the getMarkPath function to return the path of the radial marker
         wrap(TickClass.prototype, 'getMarkPath', function (
             this: Tick,

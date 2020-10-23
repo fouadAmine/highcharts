@@ -33,6 +33,7 @@ import U from '../Core/Utilities.js';
 const {
     addEvent,
     createElement,
+    fireEvent,
     pick
 } = U;
 
@@ -40,12 +41,14 @@ declare module '../Core/Chart/ChartLike'{
     interface ChartLike {
         fixedDiv?: HTMLDOMElement;
         fixedRenderer?: Highcharts.Renderer;
+        fixedSelectors?: Array<string>;
         innerContainer?: HTMLDOMElement;
         scrollingContainer?: HTMLDOMElement;
         scrollingParent?: HTMLDOMElement;
         scrollableMask?: Highcharts.SVGElement;
         scrollablePixelsX?: number;
         scrollablePixelsY?: number;
+        getFixedElements(): Array<string>;
         applyFixed(): void;
         moveFixedElements(): void;
         setUpScrolling(): void;
@@ -292,28 +295,30 @@ Chart.prototype.setUpScrolling = function (): void {
 };
 
 /**
- * These elements are moved over to the fixed renderer and stay fixed when the
- * user scrolls the chart
- * @private
+ * The helper function which returns an array of fixed classes.
+ *
+ * @function Highcharts.Chart#getFixedElements
+ * @param {Chart} this
+ *        Chart.
+ * @return {Array<string>}
+ *        Returns an array of fixed classes.
  */
-Chart.prototype.moveFixedElements = function (): void {
-    var container = this.container,
-        fixedRenderer = this.fixedRenderer,
-        fixedSelectors = [
-            '.highcharts-contextbutton',
-            '.highcharts-credits',
-            '.highcharts-legend',
-            '.highcharts-legend-checkbox',
-            '.highcharts-navigator-series',
-            '.highcharts-navigator-xaxis',
-            '.highcharts-navigator-yaxis',
-            '.highcharts-navigator',
-            '.highcharts-reset-zoom',
-            '.highcharts-scrollbar',
-            '.highcharts-subtitle',
-            '.highcharts-title'
-        ],
-        axisClass;
+Chart.prototype.getFixedElements = function (this: Chart): Array<string> {
+    const fixedSelectors = [
+        '.highcharts-contextbutton',
+        '.highcharts-credits',
+        '.highcharts-legend',
+        '.highcharts-legend-checkbox',
+        '.highcharts-navigator-series',
+        '.highcharts-navigator-xaxis',
+        '.highcharts-navigator-yaxis',
+        '.highcharts-navigator',
+        '.highcharts-reset-zoom',
+        '.highcharts-scrollbar',
+        '.highcharts-subtitle',
+        '.highcharts-title'
+    ];
+    let axisClass;
 
     if (this.scrollablePixelsX && !this.inverted) {
         axisClass = '.highcharts-yaxis';
@@ -327,7 +332,23 @@ Chart.prototype.moveFixedElements = function (): void {
 
     fixedSelectors.push(axisClass as any, axisClass + '-labels');
 
-    fixedSelectors.forEach(function (className: string): void {
+    return fixedSelectors;
+};
+
+/**
+ * These elements are moved over to the fixed renderer and stay fixed when the
+ * user scrolls the chart
+ * @private
+ */
+Chart.prototype.moveFixedElements = function (): void {
+    var container = this.container,
+        fixedRenderer = this.fixedRenderer;
+    this.fixedSelectors = this.getFixedElements();
+
+    // Add the possibility to edit the list.
+    fireEvent(this, 'afterGetFixedElements');
+
+    this.fixedSelectors.forEach(function (className: string): void {
         [].forEach.call(
             container.querySelectorAll(className),
             function (elem: DOMElementType): void {

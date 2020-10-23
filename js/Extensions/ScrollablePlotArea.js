@@ -22,7 +22,7 @@ var stop = A.stop;
 import Chart from '../Core/Chart/Chart.js';
 import H from '../Core/Globals.js';
 import U from '../Core/Utilities.js';
-var addEvent = U.addEvent, createElement = U.createElement, pick = U.pick;
+var addEvent = U.addEvent, createElement = U.createElement, fireEvent = U.fireEvent, pick = U.pick;
 /**
  * Options for a scrollable plot area. This feature provides a minimum size for
  * the plot area of the chart. If the size gets smaller than this, typically
@@ -212,12 +212,16 @@ Chart.prototype.setUpScrolling = function () {
     this.setUpScrolling = null;
 };
 /**
- * These elements are moved over to the fixed renderer and stay fixed when the
- * user scrolls the chart
- * @private
+ * The helper function which returns an array of fixed classes.
+ *
+ * @function Highcharts.Chart#getFixedElements
+ * @param {Chart} this
+ *        Chart.
+ * @return {Array<string>}
+ *        Returns an array of fixed classes.
  */
-Chart.prototype.moveFixedElements = function () {
-    var container = this.container, fixedRenderer = this.fixedRenderer, fixedSelectors = [
+Chart.prototype.getFixedElements = function () {
+    var fixedSelectors = [
         '.highcharts-contextbutton',
         '.highcharts-credits',
         '.highcharts-legend',
@@ -230,7 +234,8 @@ Chart.prototype.moveFixedElements = function () {
         '.highcharts-scrollbar',
         '.highcharts-subtitle',
         '.highcharts-title'
-    ], axisClass;
+    ];
+    var axisClass;
     if (this.scrollablePixelsX && !this.inverted) {
         axisClass = '.highcharts-yaxis';
     }
@@ -244,7 +249,19 @@ Chart.prototype.moveFixedElements = function () {
         axisClass = '.highcharts-yaxis';
     }
     fixedSelectors.push(axisClass, axisClass + '-labels');
-    fixedSelectors.forEach(function (className) {
+    return fixedSelectors;
+};
+/**
+ * These elements are moved over to the fixed renderer and stay fixed when the
+ * user scrolls the chart
+ * @private
+ */
+Chart.prototype.moveFixedElements = function () {
+    var container = this.container, fixedRenderer = this.fixedRenderer;
+    this.fixedSelectors = this.getFixedElements();
+    // Add the possibility to edit the list.
+    fireEvent(this, 'afterGetFixedElements');
+    this.fixedSelectors.forEach(function (className) {
         [].forEach.call(container.querySelectorAll(className), function (elem) {
             (elem.namespaceURI === fixedRenderer.SVG_NS ?
                 fixedRenderer.box :
