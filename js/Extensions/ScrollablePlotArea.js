@@ -249,6 +249,8 @@ Chart.prototype.getFixedElements = function () {
         axisClass = '.highcharts-yaxis';
     }
     fixedSelectors.push(axisClass, axisClass + '-labels');
+    // Add the possibility to edit the list.
+    fireEvent(this, 'afterGetFixedElements', { fixedSelectors: fixedSelectors });
     return fixedSelectors;
 };
 /**
@@ -257,11 +259,8 @@ Chart.prototype.getFixedElements = function () {
  * @private
  */
 Chart.prototype.moveFixedElements = function () {
-    var container = this.container, fixedRenderer = this.fixedRenderer;
-    this.fixedSelectors = this.getFixedElements();
-    // Add the possibility to edit the list.
-    fireEvent(this, 'afterGetFixedElements');
-    this.fixedSelectors.forEach(function (className) {
+    var container = this.container, fixedRenderer = this.fixedRenderer, fixedSelectors = this.getFixedElements();
+    fixedSelectors.forEach(function (className) {
         [].forEach.call(container.querySelectorAll(className), function (elem) {
             (elem.namespaceURI === fixedRenderer.SVG_NS ?
                 fixedRenderer.box :

@@ -41,7 +41,6 @@ declare module '../Core/Chart/ChartLike'{
     interface ChartLike {
         fixedDiv?: HTMLDOMElement;
         fixedRenderer?: Highcharts.Renderer;
-        fixedSelectors?: Array<string>;
         innerContainer?: HTMLDOMElement;
         scrollingContainer?: HTMLDOMElement;
         scrollingParent?: HTMLDOMElement;
@@ -332,6 +331,8 @@ Chart.prototype.getFixedElements = function (this: Chart): Array<string> {
 
     fixedSelectors.push(axisClass as any, axisClass + '-labels');
 
+    // Add the possibility to edit the list.
+    fireEvent(this, 'afterGetFixedElements', { fixedSelectors });
     return fixedSelectors;
 };
 
@@ -342,13 +343,10 @@ Chart.prototype.getFixedElements = function (this: Chart): Array<string> {
  */
 Chart.prototype.moveFixedElements = function (): void {
     var container = this.container,
-        fixedRenderer = this.fixedRenderer;
-    this.fixedSelectors = this.getFixedElements();
+        fixedRenderer = this.fixedRenderer,
+        fixedSelectors = this.getFixedElements();
 
-    // Add the possibility to edit the list.
-    fireEvent(this, 'afterGetFixedElements');
-
-    this.fixedSelectors.forEach(function (className: string): void {
+    fixedSelectors.forEach(function (className: string): void {
         [].forEach.call(
             container.querySelectorAll(className),
             function (elem: DOMElementType): void {

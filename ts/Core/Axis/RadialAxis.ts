@@ -1204,11 +1204,11 @@ class RadialAxis {
         });
 
         // Change the fixed elements list, #14379.
-        addEvent(Highcharts.Chart, 'afterGetFixedElements', function (): void {
-            if (this.fixedSelectors) {
-                const index1 = this.fixedSelectors.indexOf('.highcharts-yaxis');
+        addEvent(Highcharts.Chart, 'afterGetFixedElements', function (event: { fixedSelectors: Array<string> }): void {
+            if (event.fixedSelectors) {
+                const index1 = event.fixedSelectors.indexOf('.highcharts-yaxis');
                 // Remove axis and its labels from that list.
-                this.fixedSelectors.splice(index1, 2);
+                event.fixedSelectors.splice(index1, 2);
             }
         });
 

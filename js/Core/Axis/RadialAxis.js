@@ -733,11 +733,11 @@ var RadialAxis = /** @class */ (function () {
             }
         });
         // Change the fixed elements list, #14379.
-        addEvent(Highcharts.Chart, 'afterGetFixedElements', function () {
-            if (this.fixedSelectors) {
-                var index1 = this.fixedSelectors.indexOf('.highcharts-yaxis');
+        addEvent(Highcharts.Chart, 'afterGetFixedElements', function (event) {
+            if (event.fixedSelectors) {
+                var index1 = event.fixedSelectors.indexOf('.highcharts-yaxis');
                 // Remove axis and its labels from that list.
-                this.fixedSelectors.splice(index1, 2);
+                event.fixedSelectors.splice(index1, 2);
             }
         });
         // Wrap the getMarkPath function to return the path of the radial marker
