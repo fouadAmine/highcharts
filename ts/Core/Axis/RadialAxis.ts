@@ -1205,7 +1205,12 @@ class RadialAxis {
 
         // Change the fixed elements list, #14379.
         addEvent(Highcharts.Chart, 'afterGetFixedElements', function (event: { fixedSelectors: Array<string> }): void {
-            if (event.fixedSelectors) {
+            const yAxis = this.yAxis,
+                preventAxisFromScrolling: boolean = yAxis.some(function (axis): boolean|undefined {
+                    return axis.isRadial;
+                });
+
+            if (event.fixedSelectors && preventAxisFromScrolling) {
                 const index1 = event.fixedSelectors.indexOf('.highcharts-yaxis');
                 // Remove axis and its labels from that list.
                 event.fixedSelectors.splice(index1, 2);

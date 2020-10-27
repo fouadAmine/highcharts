@@ -734,7 +734,10 @@ var RadialAxis = /** @class */ (function () {
         });
         // Change the fixed elements list, #14379.
         addEvent(Highcharts.Chart, 'afterGetFixedElements', function (event) {
-            if (event.fixedSelectors) {
+            var yAxis = this.yAxis, preventAxisFromScrolling = yAxis.some(function (axis) {
+                return axis.isRadial;
+            });
+            if (event.fixedSelectors && preventAxisFromScrolling) {
                 var index1 = event.fixedSelectors.indexOf('.highcharts-yaxis');
                 // Remove axis and its labels from that list.
                 event.fixedSelectors.splice(index1, 2);
